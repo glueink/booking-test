@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Breakfast",
+      "priceNet": 6,
+      "priceTaxPercentage": 0.09,
+      "chargeMethod": "nightly",
+      "image": "https://via.placeholder.com/400x200.png?text=Breakfast"
+    },
+    {
+      "id": 2,
+      "name": "Parking",
+      "priceNet": 4,
+      "priceTaxPercentage": 0.2,
+      "chargeMethod": "nightly",
+      "image": "https://via.placeholder.com/400x200.png?text=Parking"
+    },
+    {
+      "id": 3,
+      "name": "SaunaKit",
+      "priceNet": 19,
+      "priceTaxPercentage": 0.09,
+      "chargeMethod": "once-per-booking",
+      "image": "https://via.placeholder.com/400x200.png?text=Sauna%20Kit"
+    }
+  ]
+}
