@@ -1,7 +1,31 @@
+import { type RouteRecordRaw } from 'vue-router';
+
 import MainPage from './components/MainPage.vue';
 import ProductsPage from './components/ProductsPage.vue';
-import PropertyPage from './components/PropertyPage.vue';
 import BookingsPage from './components/BookingsPage.vue';
-import routes from './config/routes';
+import PropertyPage from './components/PropertyPage.vue';
 
-export { MainPage, ProductsPage, PropertyPage, BookingsPage, routes };
+const routes: Readonly<RouteRecordRaw[]> = [
+  {
+    path: '/',
+    name: 'main',
+    component: MainPage
+  },
+  {
+    path: '/bookings',
+    name: 'bookings',
+    component: BookingsPage
+  },
+  {
+    path: '/products',
+    name: 'products',
+    component: ProductsPage
+  },
+  {
+    path: '/property',
+    name: 'property',
+    component: PropertyPage
+  }
+];
+
+export { routes };

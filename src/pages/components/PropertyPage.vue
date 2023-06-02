@@ -6,8 +6,17 @@ store.getPropertyItem();
 </script>
 
 <template>
-  <div class="">Property Page</div>
-  <div class="">{{ store.propertyItem }}</div>
+  <template v-if="store.propertyItem">
+    <b>{{ store.propertyItem.name }}</b>
+    <div>CheckIn time</div>
+    <ul>
+      <li v-for="(item, index) in store.propertyItem.startTimesLocal" :key="index">{{ item }}</li>
+    </ul>
+    <div>CheckOut time</div>
+    <ul>
+      <li v-for="(item, index) in store.propertyItem.endTimesLocal" :key="index">{{ item }}</li>
+    </ul>
+  </template>
 </template>
 
 <style lang="scss"></style>

@@ -1,29 +1,19 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { BookingFilter } from '@/widgets/BookingFilter';
+</script>
 
 <template>
-  <div class="">
-    <p>Calender</p>
-    <input
-      type="date"
-      id="start"
-      name="booking-start"
-      value="2023-05-30"
-      min="2023-05-29"
-      max="2023-06-02"
-    />
+  <BookingFilter />
+  <div class="room-list">
+    <div class="room-item">room 1</div>
+    <div class="room-item">room 2</div>
+    <div class="room-item">room 3</div>
   </div>
-  <div class="">
-    <p>Calender</p>
-    <input
-      type="date"
-      id="start"
-      name="booking-end"
-      value="2023-05-30"
-      min="2023-05-29"
-      max="2023-06-02"
-    />
+  <div class="room-detail">
+    <p>name</p>
+    <p>price = (night * nightPrice) + tax</p>
+    <img src="" alt="" />
   </div>
-  <div class="">Submit</div>
 </template>
 
 <style lang="scss"></style>
