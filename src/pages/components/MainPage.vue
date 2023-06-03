@@ -1,9 +1,6 @@
-<script lang="ts" setup>
-import { BookingFilter } from '@/widgets/BookingFilter';
-</script>
+<script lang="ts" setup></script>
 
 <template>
-  <BookingFilter />
   <div class="room-list">
     <div class="room-item">room 1</div>
     <div class="room-item">room 2</div>

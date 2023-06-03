@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
+import { BookingFilter } from '@/widgets/BookingFilter';
 </script>
 
 <template>
@@ -13,7 +14,7 @@ import { RouterLink, RouterView } from 'vue-router';
       </nav>
     </div>
   </header>
-
+  <BookingFilter />
   <RouterView />
 </template>
 
