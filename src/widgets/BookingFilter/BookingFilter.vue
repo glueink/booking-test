@@ -1,6 +1,13 @@
 <script lang="ts" setup>
 import { z } from 'zod';
 import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { parseDate } from '@/shared';
+
+const router = useRouter();
+const route = useRoute();
+
+const localError = ref<string>();
 
 // Ideally, put this code in a schema file
 const formSchema = z.object({
@@ -16,41 +23,58 @@ const formData = ref<{
   endDate: undefined
 });
 
-const startDateMin = new Date().toISOString().slice(0, 10);
+const startDateMin = parseDate().dateISO;
 const endDateMin = computed(() =>
-  formData.value.startDate
-    ? new Date(formData.value.startDate).toISOString().slice(0, 10)
-    : startDateMin
+  formData.value.startDate ? parseDate(formData.value.startDate).dateISO : startDateMin
 );
 
-function parseDate(value: string): string {
-  const dateTest = z.date().parse(new Date(value));
-  // error handler or something
-  console.log(dateTest.toJSON()); // 2023-05-31T00:00:00.000Z
-  console.log(dateTest.toISOString().slice(0, 10)); // 2023-05-31
-  return dateTest.toISOString().slice(0, 10);
+function validateQuery() {
+  const { startDate, endDate, ...rest } = route.query;
+
+  if (formSchema.safeParse({ startDate, endDate }).success) {
+    formData.value.startDate = route.query.startDate?.toString();
+    formData.value.endDate = route.query.endDate?.toString();
+    return;
+  }
+
+  router.replace({ query: rest });
 }
+
+validateQuery();
 
 function onChangeStartDate(event: Event) {
   const { value } = event.target as HTMLInputElement;
   const parsedDate = parseDate(value);
-  formData.value.startDate = parsedDate;
-  formData.value.endDate = parsedDate;
-  console.log('startDate', formData.value.startDate);
+  formData.value.startDate = parsedDate.dateISO;
+  if (
+    !formData.value.endDate ||
+    parsedDate.dateTimestamp > parseDate(formData.value.endDate).dateTimestamp
+  ) {
+    formData.value.endDate = parsedDate.dateISO;
+  }
 }
 
 function onChangeEndDate(event: Event) {
   const { value } = event.target as HTMLInputElement;
-  formData.value.endDate = parseDate(value);
-  console.log('endDate', formData.value.endDate);
+  formData.value.endDate = parseDate(value).dateISO;
 }
 
 function onFormSubmit() {
   try {
-    const valid = formSchema.parse(formData.value);
-    if (!valid) return;
+    localError.value = undefined;
+    const valid = formSchema.safeParse(formData.value);
+    if (!valid.success) {
+      localError.value = 'Enter valid dates';
+      return;
+    }
     // process data
-    console.log('SUCESS!', formData.value, formData);
+    router.push({
+      query: {
+        ...route.query,
+        startDate: formData.value.startDate,
+        endDate: formData.value.endDate
+      }
+    });
   } catch (err) {
     console.log(err);
   }
@@ -60,39 +84,36 @@ function onFormSubmit() {
 <template>
   <form class="booking-filter" @submit.prevent="onFormSubmit">
     <div>
-      <p>Property</p>
+      <div>
+        <p>Start date</p>
+        <input
+          type="date"
+          id="start"
+          name="booking-start"
+          :value="formData.startDate"
+          :min="startDateMin"
+          @change="onChangeStartDate"
+        />
+      </div>
+      <div>
+        <p>End date</p>
+        <input
+          type="date"
+          id="start"
+          name="booking-end"
+          :value="formData.endDate"
+          :min="endDateMin"
+          @change="onChangeEndDate"
+        />
+      </div>
+      <button class="">Submit</button>
     </div>
-    <div>
-      <p>Start date</p>
-      <input
-        type="date"
-        id="start"
-        name="booking-start"
-        :value="formData.startDate"
-        :min="startDateMin"
-        @change="onChangeStartDate"
-      />
-      {{ startDateMin }}
-    </div>
-    <div>
-      <p>End date</p>
-      <input
-        type="date"
-        id="start"
-        name="booking-end"
-        :value="formData.endDate"
-        :min="endDateMin"
-        @change="onChangeEndDate"
-      />
-      {{ endDateMin }}
-    </div>
-    <button class="">Submit</button>
+    <p v-if="localError" class="error">{{ localError }}</p>
   </form>
 </template>
 
 <style lang="scss">
 .booking-filter {
-  background-color: aquamarine;
-  display: flex;
+  border: 1px solid red;
 }
 </style>
