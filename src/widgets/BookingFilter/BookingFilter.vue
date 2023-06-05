@@ -4,6 +4,16 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { parseDate } from '@/shared';
 
+const emit = defineEmits<{
+  (
+    e: 'submit',
+    payload: {
+      startDate: string;
+      endDate: string;
+    }
+  ): void;
+}>();
+
 const router = useRouter();
 const route = useRoute();
 
@@ -23,17 +33,17 @@ const formData = ref<{
   endDate: undefined
 });
 
-const startDateMin = parseDate().dateISO;
+const startDateMin = parseDate(new Date()).iso;
 const endDateMin = computed(() =>
-  formData.value.startDate ? parseDate(formData.value.startDate).dateISO : startDateMin
+  formData.value.startDate ? parseDate(formData.value.startDate).iso : startDateMin
 );
 
 function validateQuery() {
   const { startDate, endDate, ...rest } = route.query;
 
-  if (formSchema.safeParse({ startDate, endDate }).success) {
-    formData.value.startDate = route.query.startDate?.toString();
-    formData.value.endDate = route.query.endDate?.toString();
+  if (startDate && endDate && formSchema.safeParse({ startDate, endDate }).success) {
+    formData.value.startDate = parseDate(startDate.toString()).iso;
+    formData.value.endDate = parseDate(endDate.toString()).iso;
     return;
   }
 
@@ -45,36 +55,39 @@ validateQuery();
 function onChangeStartDate(event: Event) {
   const { value } = event.target as HTMLInputElement;
   const parsedDate = parseDate(value);
-  formData.value.startDate = parsedDate.dateISO;
+  formData.value.startDate = parsedDate.iso;
   if (
     !formData.value.endDate ||
-    parsedDate.dateTimestamp > parseDate(formData.value.endDate).dateTimestamp
+    parsedDate.timestamp > parseDate(formData.value.endDate).timestamp
   ) {
-    formData.value.endDate = parsedDate.dateISO;
+    formData.value.endDate = parsedDate.iso;
   }
 }
 
 function onChangeEndDate(event: Event) {
   const { value } = event.target as HTMLInputElement;
-  formData.value.endDate = parseDate(value).dateISO;
+  formData.value.endDate = parseDate(value).iso;
 }
 
 function onFormSubmit() {
   try {
     localError.value = undefined;
     const valid = formSchema.safeParse(formData.value);
-    if (!valid.success) {
+    const { startDate, endDate } = formData.value;
+    if (valid.success && startDate && endDate) {
+      emit('submit', {
+        startDate,
+        endDate
+      });
+      router.replace({
+        query: {
+          startDate,
+          endDate
+        }
+      });
+    } else {
       localError.value = 'Enter valid dates';
-      return;
     }
-    // process data
-    router.push({
-      query: {
-        ...route.query,
-        startDate: formData.value.startDate,
-        endDate: formData.value.endDate
-      }
-    });
   } catch (err) {
     console.log(err);
   }

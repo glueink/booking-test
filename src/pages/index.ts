@@ -1,9 +1,8 @@
 import { type RouteRecordRaw } from 'vue-router';
 
 import MainPage from './components/MainPage.vue';
-import ProductsPage from './components/ProductsPage.vue';
-import BookingsPage from './components/BookingsPage.vue';
-import PropertyPage from './components/PropertyPage.vue';
+import RoomDetailsPage from './components/RoomDetailsPage.vue';
+import SuccessPage from './components/SuccessPage.vue';
 
 const routes: Readonly<RouteRecordRaw[]> = [
   {
@@ -12,19 +11,14 @@ const routes: Readonly<RouteRecordRaw[]> = [
     component: MainPage
   },
   {
-    path: '/bookings',
-    name: 'bookings',
-    component: BookingsPage
+    path: '/room/:roomId',
+    name: 'roomDetails',
+    component: RoomDetailsPage
   },
   {
-    path: '/products',
-    name: 'products',
-    component: ProductsPage
-  },
-  {
-    path: '/property',
-    name: 'property',
-    component: PropertyPage
+    path: '/success',
+    name: 'success',
+    component: SuccessPage
   }
 ];
 
