@@ -7,6 +7,7 @@ import { useProductStore } from '@/entities/Product';
 const route = useRoute();
 const roomStore = useRoomStore();
 const productStore = useProductStore();
+
 productStore.getProductList();
 
 const currentRoom = computed(() =>
@@ -19,7 +20,6 @@ const days = 30; // todo fix
 </script>
 
 <template>
-  <div>Room Details Page</div>
   <div v-if="currentRoom">
     <h3>Room details</h3>
     <div>Name: {{ currentRoom.name }}</div>

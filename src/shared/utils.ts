@@ -7,20 +7,39 @@ export function dateRangeOverlaps(a_start: number, a_end: number, b_start: numbe
   return false;
 }
 
-export function parseDate(value: string | number | Date): {
+type DateObject = {
   date: Date;
   timestamp: number;
   json: string;
   iso: string;
-} {
-  const dateTest = z.date().parse(new Date(value));
-  // error handler or something
+};
+
+type ConvertedDateObject = DateObject & { value: string | number | Date };
+
+export function convertDate(value: Date): ConvertedDateObject {
   const dateObject = {
-    date: dateTest, // Date
-    timestamp: +dateTest, // 1685970735895
-    json: dateTest.toJSON(), // 2023-05-31T00:00:00.000Z
-    iso: dateTest.toISOString().slice(0, 10) // 2023-05-31
+    value,
+    date: value, // Date
+    timestamp: +value, // 1685970735895
+    json: value.toJSON(), // 2023-05-31T00:00:00.000Z
+    iso: value.toISOString().slice(0, 10) // 2023-05-31
   };
   console.log(dateObject);
   return dateObject;
+}
+
+export function safeParseDate(value?: string | number | Date): ConvertedDateObject | null {
+  if (!value) {
+    return null;
+  }
+  const parsedDate = z.date().safeParse(new Date(value));
+  if (parsedDate.success) {
+    return convertDate(parsedDate.data);
+  }
+  return null;
+}
+
+export function parseDate(value: string | number | Date): ConvertedDateObject {
+  const parsedDate = z.date().parse(new Date(value));
+  return convertDate(parsedDate);
 }

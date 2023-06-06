@@ -1,16 +1,17 @@
 <script lang="ts" setup>
-import { dateRangeOverlaps } from '@/shared';
-import { ref, computed } from 'vue';
-import { BookingFilter } from '@/widgets/BookingFilter';
-
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { FilterForm } from '@/features/FilterForm';
 import { useRoomStore, type RoomItem } from '@/entities/Room';
 import { useBookingStore, type BookingList } from '@/entities/Booking';
-import { useRouter } from 'vue-router';
+import { dateRangeOverlaps } from '@/shared';
 
 const router = useRouter();
+const route = useRoute();
 
 const roomStore = useRoomStore();
 roomStore.getRoomList();
+
 const bookingStore = useBookingStore();
 bookingStore.getBookingList();
 
@@ -80,14 +81,29 @@ function handleBookNow(room: RoomItem) {
 
 function handleFilterSubmit(payload: { startDate: string; endDate: string }) {
   filter.value = payload;
+  router.push({
+    query: filter.value
+  });
 }
+
+watch(
+  () => route.query,
+  () => {
+    // check url and set time here
+    const { startDate, endDate } = route.query;
+    if (startDate && endDate) {
+      filter.value = {
+        startDate: startDate.toString(),
+        endDate: endDate.toString()
+      };
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <template>
-  <div class="">Search Page</div>
-  {{ nights }}
-  <BookingFilter @submit="handleFilterSubmit" />
-
+  <FilterForm @submit="handleFilterSubmit" />
   <ul v-if="availableRoomsList.length > 0 && filter" class="room-list">
     <li v-for="room in availableRoomsList" :key="room.id" class="room-list__item">
       <div class="">
