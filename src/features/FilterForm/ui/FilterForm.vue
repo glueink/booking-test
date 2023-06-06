@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { parseDate } from '@/shared';
+import { ref, computed, watch } from 'vue';
+import { guardStartEnd, parseDate } from '@/shared';
 
 const emit = defineEmits<{
   (
@@ -12,13 +12,27 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const startDate = ref<string>();
-const endDate = ref<string>();
+const props = defineProps<{
+  filter?: {
+    startDate: string;
+    endDate: string;
+  };
+}>();
 
 const localError = ref<string>();
+const startDate = ref<string | undefined>(props.filter?.startDate);
+const endDate = ref<string | undefined>(props.filter?.endDate);
 const startDateMin = parseDate(new Date()).iso;
 const endDateMin = computed(() =>
   startDate.value ? parseDate(startDate.value).iso : startDateMin
+);
+
+watch(
+  () => props.filter,
+  () => {
+    startDate.value = props.filter?.startDate;
+    endDate.value = props.filter?.endDate;
+  }
 );
 
 function onChangeStartDate(event: Event) {
@@ -38,16 +52,15 @@ function onChangeEndDate(event: Event) {
 function onFormSubmit() {
   try {
     localError.value = undefined;
-    if (!startDate.value || !endDate.value) {
+    const dates = guardStartEnd(startDate.value, endDate.value);
+    if (!dates) {
       localError.value = 'Enter valid dates';
       return;
     }
-    const start = parseDate(startDate.value);
-    const end = parseDate(endDate.value);
 
     emit('submit', {
-      startDate: start.iso,
-      endDate: end.iso
+      startDate: dates.startDate,
+      endDate: dates.endDate
     });
   } catch (err) {
     console.log(err);

@@ -1,3 +1,5 @@
+import { ref, watch } from 'vue';
+import { useRoute, useRouter, type LocationQuery, type Router } from 'vue-router';
 import { z } from 'zod';
 
 export function dateRangeOverlaps(a_start: number, a_end: number, b_start: number, b_end: number) {
@@ -14,11 +16,8 @@ type DateObject = {
   iso: string;
 };
 
-type ConvertedDateObject = DateObject & { value: string | number | Date };
-
-export function convertDate(value: Date): ConvertedDateObject {
+export function convertDate(value: Date): DateObject {
   const dateObject = {
-    value,
     date: value, // Date
     timestamp: +value, // 1685970735895
     json: value.toJSON(), // 2023-05-31T00:00:00.000Z
@@ -28,7 +27,7 @@ export function convertDate(value: Date): ConvertedDateObject {
   return dateObject;
 }
 
-export function safeParseDate(value?: string | number | Date): ConvertedDateObject | null {
+export function safeParseDate(value?: string | number | Date): DateObject | null {
   if (!value) {
     return null;
   }
@@ -39,7 +38,24 @@ export function safeParseDate(value?: string | number | Date): ConvertedDateObje
   return null;
 }
 
-export function parseDate(value: string | number | Date): ConvertedDateObject {
+export function parseDate(value: string | number | Date): DateObject {
   const parsedDate = z.date().parse(new Date(value));
   return convertDate(parsedDate);
+}
+
+export function guardStartEnd(start: unknown, end: unknown) {
+  if (!start || !end) {
+    return null;
+  }
+
+  const parsedStartDate = safeParseDate(String(start));
+  const parsedEndDate = safeParseDate(String(end));
+  if (!parsedStartDate || !parsedEndDate || parsedStartDate.timestamp > parsedEndDate.timestamp) {
+    return null;
+  }
+
+  return {
+    startDate: parsedStartDate.iso,
+    endDate: parsedEndDate.iso
+  };
 }

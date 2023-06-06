@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { FilterForm } from '@/features/FilterForm';
 import { useRoomStore, type RoomItem } from '@/entities/Room';
 import { useBookingStore, type BookingList } from '@/entities/Booking';
-import { dateRangeOverlaps } from '@/shared';
+import { dateRangeOverlaps, guardStartEnd } from '@/shared';
 
 const router = useRouter();
 const route = useRoute();
@@ -88,22 +88,23 @@ function handleFilterSubmit(payload: { startDate: string; endDate: string }) {
 
 watch(
   () => route.query,
-  () => {
+  (value) => {
     // check url and set time here
-    const { startDate, endDate } = route.query;
-    if (startDate && endDate) {
-      filter.value = {
-        startDate: startDate.toString(),
-        endDate: endDate.toString()
-      };
+    const { startDate, endDate, ...rest } = value;
+    // if everything is ok, then set, otherwise redirect to rest
+    const dates = guardStartEnd(startDate, endDate);
+    if (dates) {
+      filter.value = dates;
+      return;
     }
+    router.replace({ query: rest });
   },
   { immediate: true, deep: true }
 );
 </script>
 
 <template>
-  <FilterForm @submit="handleFilterSubmit" />
+  <FilterForm :filter="filter" @submit="handleFilterSubmit" />
   <ul v-if="availableRoomsList.length > 0 && filter" class="room-list">
     <li v-for="room in availableRoomsList" :key="room.id" class="room-list__item">
       <div class="">
