@@ -8,17 +8,11 @@ defineProps<{
 </script>
 
 <template>
-  <div class="">
+  <div>
     <div>Name: {{ name }}</div>
     <img :src="imageSrc" alt="" />
     <div>Price: {{ price }}</div>
-
-    <div v-if="discount">
-      Discount:
-      {{ discount }}
-    </div>
+    <div v-if="discount">Discount: {{ discount }}</div>
   </div>
-  <div>
-    <slot name="actions" />
-  </div>
+  <div><slot name="actions" /></div>
 </template>

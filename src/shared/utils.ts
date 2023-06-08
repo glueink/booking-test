@@ -1,5 +1,3 @@
-import { ref, watch } from 'vue';
-import { useRoute, useRouter, type LocationQuery, type Router } from 'vue-router';
 import { z } from 'zod';
 
 export function dateRangeOverlaps(a_start: number, a_end: number, b_start: number, b_end: number) {
@@ -58,4 +56,28 @@ export function guardStartEnd(start: unknown, end: unknown) {
     startDate: parsedStartDate.iso,
     endDate: parsedEndDate.iso
   };
+}
+
+// return minimum 1
+export function calculateNights(
+  startDate?: string | number | Date,
+  endDate?: string | number | Date
+): number {
+  const parsedStartDate = safeParseDate(startDate);
+  const parsedEndDate = safeParseDate(endDate);
+  if (!parsedStartDate || !parsedEndDate) {
+    return 1;
+  }
+  return ~~((parsedEndDate.timestamp - parsedStartDate.timestamp) / 1000 / 60 / 60 / 24) || 1;
+}
+
+export function calculatePrice(netPrice: number, taxPercent: number) {
+  return netPrice + netPrice * taxPercent;
+}
+
+export function calculateDiscount(number: number, nights: number) {
+  if (nights >= 3) {
+    return ~~((number * 5) / 100);
+  }
+  return 0;
 }

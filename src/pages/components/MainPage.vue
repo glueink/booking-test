@@ -1,10 +1,16 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { FilterForm } from '@/features/FilterForm';
-import { useRoomStore, type RoomItem } from '@/entities/Room';
+import { FilterForm } from '@/features/Filter';
+import { useRoomStore, type RoomItem, RoomPreview } from '@/entities/Room';
 import { useBookingStore, type BookingList } from '@/entities/Booking';
-import { dateRangeOverlaps, guardStartEnd } from '@/shared';
+import {
+  calculateNights,
+  dateRangeOverlaps,
+  guardStartEnd,
+  calculateDiscount,
+  calculatePrice
+} from '@/shared';
 
 const router = useRouter();
 const route = useRoute();
@@ -19,19 +25,10 @@ const filter = ref<{ startDate: string; endDate: string }>();
 
 const nights = computed(() => {
   const { startDate, endDate } = filter.value || {};
-  return ~~((convertData(endDate) - convertData(startDate)) / 1000 / 60 / 60 / 24) || 1; // min 1
+  return calculateNights(startDate, endDate);
 });
 
-// todo add price
-// todo fix discount for price
-function discount(number: number, nights: number) {
-  if (nights >= 3) {
-    return ~~((number * 5) / 100);
-  }
-  return 0;
-}
-
-function convertData(data: string | undefined) {
+function convertData(data?: string) {
   if (!data) {
     return 0;
   }
@@ -44,9 +41,8 @@ function checkAvailableRoom(
   startDate: string,
   endDate: string
 ) {
-  const overlappedBooking = bookingList.filter((item) => item.roomId === room.id); // rename
-
-  return !overlappedBooking.some((booking) =>
+  const alreadyBookedList = bookingList.filter((item) => item.roomId === room.id); // rename
+  return !alreadyBookedList.some((booking) =>
     dateRangeOverlaps(
       convertData(startDate),
       convertData(endDate),
@@ -57,19 +53,16 @@ function checkAvailableRoom(
 }
 
 const availableRoomsList = computed(() => {
-  // todo add real filter
   if (!filter.value) {
     return [];
   }
   const { startDate, endDate } = filter.value;
-  // moked data
   return [...roomStore.roomList].filter((item) =>
     checkAvailableRoom(item, bookingStore.bookingList, startDate, endDate)
   );
 });
 
 function handleBookNow(room: RoomItem) {
-  console.log(room);
   const { id } = room;
 
   router.push({
@@ -89,9 +82,7 @@ function handleFilterSubmit(payload: { startDate: string; endDate: string }) {
 watch(
   () => route.query,
   (value) => {
-    // check url and set time here
     const { startDate, endDate, ...rest } = value;
-    // if everything is ok, then set, otherwise redirect to rest
     const dates = guardStartEnd(startDate, endDate);
     if (dates) {
       filter.value = dates;
@@ -107,23 +98,14 @@ watch(
   <FilterForm :filter="filter" @submit="handleFilterSubmit" />
   <ul v-if="availableRoomsList.length > 0 && filter" class="room-list">
     <li v-for="room in availableRoomsList" :key="room.id" class="room-list__item">
-      <div class="">
-        <div>Name: {{ room.name }}</div>
-        <img :src="room.image" alt="" />
-        <div>
-          Price: {{ room.pricePerNightNet + room.pricePerNightNet * room.priceTaxPercentage }}
-        </div>
-
-        <div>
-          Discount:
-          {{
-            discount(
-              room.pricePerNightNet + room.pricePerNightNet * room.priceTaxPercentage,
-              nights
-            )
-          }}
-        </div>
-      </div>
+      <RoomPreview
+        :name="room.name"
+        :image-src="room.image"
+        :price="calculatePrice(room.pricePerNightNet, room.priceTaxPercentage)"
+        :discount="
+          calculateDiscount(calculatePrice(room.pricePerNightNet, room.priceTaxPercentage), nights)
+        "
+      />
       <button @click="handleBookNow(room)">Book Now</button>
     </li>
   </ul>
