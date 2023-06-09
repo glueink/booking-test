@@ -7,7 +7,9 @@ import {
   guardStartEnd,
   calculateNights,
   calculatePrice,
-  calculateDiscount
+  calculateDiscount,
+  isoDateSchema,
+  isIsoDate
 } from './utils';
 
 export {
@@ -19,5 +21,7 @@ export {
   guardStartEnd,
   calculateNights,
   calculatePrice,
-  calculateDiscount
+  calculateDiscount,
+  isoDateSchema,
+  isIsoDate
 };

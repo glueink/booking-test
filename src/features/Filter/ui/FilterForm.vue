@@ -70,9 +70,9 @@ function onFormSubmit() {
 
 <template>
   <form class="booking-filter" @submit.prevent="onFormSubmit">
-    <div>
-      <div>
-        <p>Start date</p>
+    <div class="booking-filter__container">
+      <div class="booking-filter__input-wrapper">
+        <label>Start date</label>
         <input
           type="date"
           id="start"
@@ -82,8 +82,8 @@ function onFormSubmit() {
           @change="onChangeStartDate"
         />
       </div>
-      <div>
-        <p>End date</p>
+      <div class="booking-filter__input-wrapper">
+        <label>End date</label>
         <input
           type="date"
           id="start"
@@ -93,7 +93,7 @@ function onFormSubmit() {
           @change="onChangeEndDate"
         />
       </div>
-      <button class="">Submit</button>
+      <button type="submit">Submit</button>
     </div>
     <p v-if="localError" class="error">{{ localError }}</p>
   </form>
@@ -101,6 +101,14 @@ function onFormSubmit() {
 
 <style lang="scss">
 .booking-filter {
+  display: inline-block;
   border: 1px solid red;
+  &__container {
+    display: flex;
+    gap: 10px;
+  }
+  &__input-wrapper {
+    display: grid;
+  }
 }
 </style>

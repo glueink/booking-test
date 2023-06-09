@@ -8,11 +8,25 @@ defineProps<{
 </script>
 
 <template>
-  <div>
-    <div>Name: {{ name }}</div>
+  <div class="room__item">
+    <p>Room name: {{ name }}</p>
     <img :src="imageSrc" alt="" />
-    <div>Price: {{ price }}</div>
-    <div v-if="discount">Discount: {{ discount }}</div>
+    <p>
+      <b>Price: {{ price }}</b>
+    </p>
+    <p v-if="discount">Discount: {{ discount }}</p>
+    <div><slot name="actions" /></div>
   </div>
-  <div><slot name="actions" /></div>
 </template>
+
+<style lang="scss">
+.room__item {
+  border: 1px solid green;
+  padding: 10px;
+  margin-bottom: 10px;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+</style>

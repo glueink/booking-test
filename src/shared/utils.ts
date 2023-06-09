@@ -81,3 +81,45 @@ export function calculateDiscount(number: number, nights: number) {
   }
   return 0;
 }
+
+// format ISO 'YYYY-MM-DD'
+export const isoDateSchema = z.string().transform((val, ctx) => {
+  const regEx = /^\d{4}-\d{2}-\d{2}$/;
+  if (!val || typeof val !== 'string') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Not valid date'
+    });
+    return z.NEVER;
+  }
+  if (!val.match(regEx)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Not valid date'
+    });
+    return z.NEVER;
+  }
+  const d = new Date(val);
+  const dNum = d.getTime();
+  if (!dNum && dNum !== 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Not valid date'
+    });
+    return z.NEVER;
+  }
+  if (d.toISOString().slice(0, 10) !== val) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Not valid date'
+    });
+    return z.NEVER;
+  }
+  return val;
+});
+
+type IsoDateType = z.infer<typeof isoDateSchema>;
+
+export function isIsoDate(date: unknown): date is IsoDateType {
+  return isoDateSchema.safeParse(date).success;
+}

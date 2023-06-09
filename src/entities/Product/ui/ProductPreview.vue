@@ -10,17 +10,28 @@ defineProps<{
 </script>
 
 <template>
-  <div class="product__item">
-    <div>Name: {{ name }}</div>
-    <img :src="image" alt="" width="100" />
-    <div>Price: {{ price }}</div>
-    <div v-if="chargeMethod">Charge Method: {{ chargeMethod }}</div>
+  <span class="product__item">
+    <p>Name: {{ name }}</p>
+    <img :src="image" alt="" class="product__image" />
+    <p v-if="chargeMethod">Charge Method: {{ chargeMethod }}</p>
+    <p>
+      <b>Price: {{ price }}</b>
+    </p>
     <div><slot name="actions" /></div>
-  </div>
+  </span>
 </template>
 
 <style lang="scss">
-.product__item {
-  border: 1px solid green;
+.product {
+  &__item {
+    display: grid;
+    border: 1px solid lightblue;
+    padding: 10px;
+  }
+
+  &__image {
+    display: block;
+    width: 100%;
+  }
 }
 </style>

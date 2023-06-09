@@ -95,7 +95,7 @@ watch(
 </script>
 
 <template>
-  <FilterForm :filter="filter" @submit="handleFilterSubmit" />
+  <FilterForm class="filter" :filter="filter" @submit="handleFilterSubmit" />
   <ul v-if="availableRoomsList.length > 0 && filter" class="room-list">
     <li v-for="room in availableRoomsList" :key="room.id" class="room-list__item">
       <RoomPreview
@@ -105,20 +105,27 @@ watch(
         :discount="
           calculateDiscount(calculatePrice(room.pricePerNightNet, room.priceTaxPercentage), nights)
         "
-      />
-      <button @click="handleBookNow(room)">Book Now</button>
+      >
+        <template #actions>
+          <button @click="handleBookNow(room)">Book Now</button>
+        </template>
+      </RoomPreview>
     </li>
   </ul>
 </template>
 
 <style lang="scss">
+.filter {
+  margin-bottom: 10px;
+}
+
 .room-list {
   display: grid;
   margin: 0;
   padding: 0;
+
   &__item {
     display: grid;
-    border: 1px solid black;
     margin-bottom: 10px;
     &:last-of-type {
       margin-bottom: 0;
