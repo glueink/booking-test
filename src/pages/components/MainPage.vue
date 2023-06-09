@@ -121,15 +121,12 @@ watch(
 
 .room-list {
   display: grid;
+  gap: 10px;
   margin: 0;
   padding: 0;
 
   &__item {
-    display: grid;
-    margin-bottom: 10px;
-    &:last-of-type {
-      margin-bottom: 0;
-    }
+    display: block;
   }
 }
 </style>

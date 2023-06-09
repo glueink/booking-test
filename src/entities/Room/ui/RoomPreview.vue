@@ -23,10 +23,5 @@ defineProps<{
 .room__item {
   border: 1px solid green;
   padding: 10px;
-  margin-bottom: 10px;
-
-  &:last-of-type {
-    margin-bottom: 0;
-  }
 }
 </style>
