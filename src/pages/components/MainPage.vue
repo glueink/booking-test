@@ -3,8 +3,8 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterForm, useFilter } from '@/features/Filter';
 import { useRoomStore, type RoomItem, RoomPreview } from '@/entities/Room';
-import { useBookingStore, type BookingList } from '@/entities/Booking';
-import { calculateNights, dateRangeOverlaps, calculateDiscount, calculatePrice } from '@/shared';
+import { useBookingStore, checkAvailableRoom } from '@/features/Booking';
+import { calculateNights, calculateDiscount, calculatePrice } from '@/shared';
 
 const router = useRouter();
 const { filter, handleFilterChange } = useFilter();
@@ -19,30 +19,6 @@ const nights = computed(() => {
   const { startDate, endDate } = filter.value || {};
   return calculateNights(startDate, endDate);
 });
-
-function convertData(data?: string) {
-  if (!data) {
-    return 0;
-  }
-  return Date.parse(data);
-}
-
-function checkAvailableRoom(
-  room: RoomItem,
-  bookingList: BookingList,
-  startDate: string,
-  endDate: string
-) {
-  const alreadyBookedList = bookingList.filter((item) => item.roomId === room.id);
-  return !alreadyBookedList.some((booking) =>
-    dateRangeOverlaps(
-      convertData(startDate),
-      convertData(endDate),
-      convertData(booking.startDateUtc),
-      convertData(booking.endDateUtc)
-    )
-  );
-}
 
 const availableRoomsList = computed(() => {
   if (!filter.value) {

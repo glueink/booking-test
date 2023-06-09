@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { checkAvailableRoom, useBookingStore } from '@/features/Booking';
 import { FilterForm, useFilter } from '@/features/Filter';
 import { usePropertyStore, PropertyPreview } from '@/entities/Property';
 import { useRoomStore, RoomPreview } from '@/entities/Room';
 import { useProductStore, ProductPreview } from '@/entities/Product';
-import { calculatePrice, calculateDiscount } from '@/shared';
+import { calculatePrice, calculateDiscount, calculateNights } from '@/shared';
 
 const route = useRoute();
 const { filter, handleFilterChange } = useFilter();
@@ -19,13 +20,27 @@ productStore.getProductList();
 const propertyStore = usePropertyStore();
 propertyStore.getPropertyItem();
 
+const bookingStore = useBookingStore();
+bookingStore.getBookingList();
+
 const currentRoom = computed(() =>
   roomStore.roomList.find((item) => {
     return item.id.toString() === route.params.roomId;
   })
 );
 
-const nights = 30; // calculate nights
+const isRoomAvailable = computed(() => {
+  if (!filter.value || !currentRoom.value) {
+    return false;
+  }
+  const { startDate, endDate } = filter.value;
+  return checkAvailableRoom(currentRoom.value, bookingStore.bookingList, startDate, endDate);
+});
+
+const nights = computed(() => {
+  const { startDate, endDate } = filter.value || {};
+  return calculateNights(startDate, endDate);
+});
 
 type formData = {
   startDate: string;
@@ -45,7 +60,7 @@ function onFormSubmit() {
 
 <template>
   <FilterForm class="filter" :filter="filter" @submit="handleFilterChange" />
-  <div v-if="currentRoom && filter">
+  <div v-if="currentRoom && filter && isRoomAvailable">
     <section>
       <h4>Room details</h4>
       <RoomPreview
@@ -94,12 +109,13 @@ function onFormSubmit() {
     </section>
 
     <form @submit.prevent="onFormSubmit">
+      Nights: {{ nights }}
       <div>todo breakfest</div>
       <h3>Calculated price and discount</h3>
-      <button>Book now for: n</button>
+      <button>Book now for 'price'</button>
     </form>
   </div>
-  <div v-else>No results</div>
+  <div v-else>Room is not available</div>
 </template>
 
 <style lang="scss">
