@@ -1,22 +1,15 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
-import { guardStartEnd, parseDate } from '@/shared';
+import { parseDate } from '@/shared';
+import { validateFilter } from '../utils';
+import { type FilterType } from '../types';
 
 const emit = defineEmits<{
-  (
-    e: 'submit',
-    payload: {
-      startDate: string;
-      endDate: string;
-    }
-  ): void;
+  (e: 'submit', payload: FilterType): void;
 }>();
 
 const props = defineProps<{
-  filter?: {
-    startDate: string;
-    endDate: string;
-  };
+  filter?: FilterType;
 }>();
 
 const localError = ref<string>();
@@ -52,7 +45,7 @@ function onChangeEndDate(event: Event) {
 function onFormSubmit() {
   try {
     localError.value = undefined;
-    const dates = guardStartEnd(startDate.value, endDate.value);
+    const dates = validateFilter(startDate.value, endDate.value);
     if (!dates) {
       localError.value = 'Enter valid dates';
       return;

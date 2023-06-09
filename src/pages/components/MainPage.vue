@@ -1,27 +1,19 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { FilterForm } from '@/features/Filter';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { FilterForm, useFilter } from '@/features/Filter';
 import { useRoomStore, type RoomItem, RoomPreview } from '@/entities/Room';
 import { useBookingStore, type BookingList } from '@/entities/Booking';
-import {
-  calculateNights,
-  dateRangeOverlaps,
-  guardStartEnd,
-  calculateDiscount,
-  calculatePrice
-} from '@/shared';
+import { calculateNights, dateRangeOverlaps, calculateDiscount, calculatePrice } from '@/shared';
 
 const router = useRouter();
-const route = useRoute();
+const { filter, handleFilterChange } = useFilter();
 
 const roomStore = useRoomStore();
 roomStore.getRoomList();
 
 const bookingStore = useBookingStore();
 bookingStore.getBookingList();
-
-const filter = ref<{ startDate: string; endDate: string }>();
 
 const nights = computed(() => {
   const { startDate, endDate } = filter.value || {};
@@ -41,7 +33,7 @@ function checkAvailableRoom(
   startDate: string,
   endDate: string
 ) {
-  const alreadyBookedList = bookingList.filter((item) => item.roomId === room.id); // rename
+  const alreadyBookedList = bookingList.filter((item) => item.roomId === room.id);
   return !alreadyBookedList.some((booking) =>
     dateRangeOverlaps(
       convertData(startDate),
@@ -71,31 +63,11 @@ function handleBookNow(room: RoomItem) {
     query: filter.value
   });
 }
-
-function handleFilterSubmit(payload: { startDate: string; endDate: string }) {
-  filter.value = payload;
-  router.push({
-    query: filter.value
-  });
-}
-
-watch(
-  () => route.query,
-  (value) => {
-    const { startDate, endDate, ...rest } = value;
-    const dates = guardStartEnd(startDate, endDate);
-    if (dates) {
-      filter.value = dates;
-      return;
-    }
-    router.replace({ query: rest });
-  },
-  { immediate: true, deep: true }
-);
 </script>
 
 <template>
-  <FilterForm class="filter" :filter="filter" @submit="handleFilterSubmit" />
+  <FilterForm class="filter" :filter="filter" @submit="handleFilterChange" />
+  <h4>Room list</h4>
   <ul v-if="availableRoomsList.length > 0 && filter" class="room-list">
     <li v-for="room in availableRoomsList" :key="room.id" class="room-list__item">
       <RoomPreview
@@ -112,6 +84,7 @@ watch(
       </RoomPreview>
     </li>
   </ul>
+  <div v-else>No results</div>
 </template>
 
 <style lang="scss">

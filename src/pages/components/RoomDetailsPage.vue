@@ -1,13 +1,17 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { FilterForm, useFilter } from '@/features/Filter';
 import { usePropertyStore, PropertyPreview } from '@/entities/Property';
 import { useRoomStore, RoomPreview } from '@/entities/Room';
 import { useProductStore, ProductPreview } from '@/entities/Product';
 import { calculatePrice, calculateDiscount } from '@/shared';
 
 const route = useRoute();
+const { filter, handleFilterChange } = useFilter();
+
 const roomStore = useRoomStore();
+roomStore.getRoomList();
 
 const productStore = useProductStore();
 productStore.getProductList();
@@ -40,7 +44,8 @@ function onFormSubmit() {
 </script>
 
 <template>
-  <div v-if="currentRoom">
+  <FilterForm class="filter" :filter="filter" @submit="handleFilterChange" />
+  <div v-if="currentRoom && filter">
     <section>
       <h4>Room details</h4>
       <RoomPreview
@@ -94,6 +99,7 @@ function onFormSubmit() {
       <button>Book now for: n</button>
     </form>
   </div>
+  <div v-else>No results</div>
 </template>
 
 <style lang="scss">

@@ -1,43 +1,15 @@
-import { z } from 'zod';
+import { isIsoDate } from '@/shared';
+import type { FilterType } from './types';
 
-// format 'YYYY-MM-DD'
-const filterDateSchema = z.string().transform((val, ctx) => {
-  const regEx = /^\d{4}-\d{2}-\d{2}$/;
-  if (!val || typeof val !== 'string') {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Not valid date'
-    });
-    return z.NEVER;
+export function validateFilter(startDate: unknown, endDate: unknown): FilterType | null {
+  if (!isIsoDate(startDate) || !isIsoDate(endDate)) {
+    return null;
   }
-  if (!val.match(regEx)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Not valid date'
-    });
-    return z.NEVER;
+  if (new Date(startDate) > new Date(endDate)) {
+    return null;
   }
-  const d = new Date(val);
-  const dNum = d.getTime();
-  if (!dNum && dNum !== 0) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Not valid date'
-    });
-    return z.NEVER;
-  }
-  if (d.toISOString().slice(0, 10) !== val) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Not valid date'
-    });
-    return z.NEVER;
-  }
-  return val;
-});
-
-type DateStringType = z.infer<typeof filterDateSchema>;
-
-function isValidFilterDate(date: unknown): date is DateStringType {
-  return filterDateSchema.safeParse(date).success;
+  return {
+    startDate,
+    endDate
+  };
 }

@@ -1,10 +1,9 @@
 import api from './api';
 import {
   parseDate,
-  safeParseDate,
+  parseIsoToDateObject,
   convertDate,
   dateRangeOverlaps,
-  guardStartEnd,
   calculateNights,
   calculatePrice,
   calculateDiscount,
@@ -15,10 +14,9 @@ import {
 export {
   api,
   parseDate,
-  safeParseDate,
+  parseIsoToDateObject,
   convertDate,
   dateRangeOverlaps,
-  guardStartEnd,
   calculateNights,
   calculatePrice,
   calculateDiscount,
