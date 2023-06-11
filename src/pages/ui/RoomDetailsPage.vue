@@ -7,6 +7,7 @@ import { usePropertyStore, PropertyPreview } from '@/entities/Property';
 import { useRoomStore, RoomPreview } from '@/entities/Room';
 import { useProductStore, ProductPreview } from '@/entities/Product';
 import { calculatePrice, calculateDiscount, calculateNights } from '@/shared';
+import { useCheckoutStore } from '@/features/Checkout';
 
 const route = useRoute();
 const { filter, handleFilterChange } = useFilter();
@@ -22,6 +23,8 @@ propertyStore.getPropertyItem();
 
 const bookingStore = useBookingStore();
 bookingStore.getBookingList();
+
+const checkoutStore = useCheckoutStore();
 
 const currentRoom = computed(() =>
   roomStore.roomList.find((item) => {
@@ -51,9 +54,17 @@ type formData = {
 
 function onFormSubmit() {
   try {
-    console.log('');
+    if (!filter.value) {
+      return;
+    }
+    checkoutStore.doCheckout({
+      endDate: filter.value?.endDate,
+      startDate: filter.value?.startDate,
+      productIdList: [],
+      roomId: 1
+    });
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 </script>
@@ -75,7 +86,7 @@ function onFormSubmit() {
         "
       />
     </section>
-
+    <br />
     <section>
       <h4>Property</h4>
       <PropertyPreview
@@ -86,7 +97,7 @@ function onFormSubmit() {
         :end-times-local="propertyStore.propertyItem.endTimesLocal"
       />
     </section>
-
+    <br />
     <section>
       <h4>Available products</h4>
       <div class="product-grid">
@@ -107,7 +118,7 @@ function onFormSubmit() {
         </ProductPreview>
       </div>
     </section>
-
+    <br />
     <form @submit.prevent="onFormSubmit">
       Nights: {{ nights }}
       <div>todo breakfest</div>

@@ -17,7 +17,7 @@ defineProps<{
     <p>
       <b>Price: {{ price }}</b>
     </p>
-    <div><slot name="actions" /></div>
+    <div v-if="$slots.actions"><slot name="actions" /></div>
   </span>
 </template>
 

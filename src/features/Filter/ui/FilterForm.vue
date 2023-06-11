@@ -56,7 +56,7 @@ function onFormSubmit() {
       endDate: dates.endDate
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 </script>
@@ -98,6 +98,7 @@ function onFormSubmit() {
   border: 1px solid red;
   &__container {
     display: flex;
+    flex-flow: row wrap;
     gap: 10px;
   }
   &__input-wrapper {

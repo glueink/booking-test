@@ -1,8 +1,10 @@
 import { type RouteRecordRaw } from 'vue-router';
 
-import MainPage from './components/MainPage.vue';
-import RoomDetailsPage from './components/RoomDetailsPage.vue';
-import SuccessPage from './components/SuccessPage.vue';
+import { useCheckoutStore } from '@/features/Checkout';
+
+import MainPage from './ui/MainPage.vue';
+import RoomDetailsPage from './ui/RoomDetailsPage.vue';
+import SuccessPage from './ui/SuccessPage.vue';
 
 const routes: Readonly<RouteRecordRaw[]> = [
   {
@@ -18,7 +20,13 @@ const routes: Readonly<RouteRecordRaw[]> = [
   {
     path: '/success',
     name: 'success',
-    component: SuccessPage
+    component: SuccessPage,
+    beforeEnter(to, from) {
+      const checkoutStore = useCheckoutStore();
+      if (!checkoutStore.isAvailable) {
+        return from;
+      }
+    }
   }
 ];
 
