@@ -20,7 +20,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
     try {
       checkout.value = CheckoutSchema.parse(payload);
       isAvailable.value = true;
-      // make api call
+      // make api call and push to bookings
+      console.log(self.crypto.getRandomValues(new Uint32Array(10))[0]);
       // const response = await Promise.resolve();
     } catch (err) {
       console.error(err);
