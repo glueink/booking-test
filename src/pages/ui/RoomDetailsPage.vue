@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { checkAvailableRoom, useBookingStore } from '@/features/Booking';
 import { FilterForm, useFilter, type FilterType } from '@/features/Filter';
