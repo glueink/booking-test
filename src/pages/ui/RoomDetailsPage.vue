@@ -1,15 +1,21 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { checkAvailableRoom, useBookingStore } from '@/features/Booking';
 import { FilterForm, useFilter, type FilterType } from '@/features/Filter';
 import { usePropertyStore, PropertyPreview } from '@/entities/Property';
-import { useRoomStore, RoomPreview } from '@/entities/Room';
-import { useProductStore, ProductPreview } from '@/entities/Product';
-import { calculatePrice, calculateDiscount, calculateNights } from '@/shared';
-import { useCheckoutStore } from '@/features/Checkout';
+import { useRoomStore, RoomPreview, getRoomPriceResult } from '@/entities/Room';
+import {
+  useProductStore,
+  ProductPreview,
+  ProductPreviewGrid,
+  getProductPriceResult
+} from '@/entities/Product';
+import { calculatePrice, calculateDiscount, calculateNights, PageRoutes } from '@/shared';
 
 const route = useRoute();
+const router = useRouter();
+
 const { filter, handleFilterChange } = useFilter();
 
 const roomStore = useRoomStore();
@@ -23,8 +29,6 @@ propertyStore.getPropertyItem();
 
 const bookingStore = useBookingStore();
 bookingStore.getBookingList();
-
-const checkoutStore = useCheckoutStore();
 
 const currentRoom = computed(() =>
   roomStore.roomList.find((item) => {
@@ -45,18 +49,9 @@ const nights = computed(() => {
   return calculateNights(startDate, endDate);
 });
 
-type FormData = {
-  startDate: string;
-  endDate: string;
-  roomId: number;
-  productIds: number[];
-};
-
-const formData = ref<FormData>();
-const productIds = ref([]);
+const productIds = ref<number[]>([]);
 
 function resetForm() {
-  formData.value = undefined;
   productIds.value = [];
 }
 
@@ -65,22 +60,44 @@ function onFilterSubmit(payload: FilterType) {
   resetForm();
 }
 
-function onFormSubmit() {
-  try {
-    if (!filter.value || !currentRoom.value) {
-      return;
-    }
-    checkoutStore.doCheckout({
-      endDate: filter.value.endDate,
-      startDate: filter.value.startDate,
-      productIdList: productIds.value,
-      roomId: currentRoom.value.id
-    });
-    resetForm();
-  } catch (err) {
-    console.error(err);
+async function onFormSubmit() {
+  // guarantees filter & currentRoom
+  if (!isRoomAvailable.value) {
+    return;
   }
+  bookingStore
+    .createNewBooking({
+      endDate: filter.value!.endDate,
+      startDate: filter.value!.startDate,
+      productIdList: nights.value >= 28 ? [1, ...productIds.value] : [...productIds.value], // discount for breakfast
+      roomId: currentRoom.value!.id
+    })
+    // replace catch if need to stop propogation
+    // .catch((e) => {
+    //   throw e;
+    // })
+    .catch(() => {})
+    .then(() => {
+      resetForm();
+      router.push({ name: PageRoutes.SUCCESS });
+    });
 }
+
+const calculatedProductsPrice = computed(() => {
+  return productStore.productList.reduce((acc, current) => {
+    if (productIds.value.includes(current.id)) {
+      return acc + getProductPriceResult(current, nights.value);
+    }
+    return acc;
+  }, 0);
+});
+
+const calculatedRoomsPrice = computed(() => {
+  if (!currentRoom.value) {
+    return 0;
+  }
+  return getRoomPriceResult(currentRoom.value, nights.value);
+});
 </script>
 
 <template>
@@ -113,17 +130,19 @@ function onFormSubmit() {
     </section>
     <br />
     <section>
-      <h4>Available products</h4>
-      <div class="product-grid">
-        <template v-for="product in productStore.productList" :key="product.id">
+      <form @submit.prevent="onFormSubmit">
+        <h4>Available products</h4>
+        <ProductPreviewGrid>
           <ProductPreview
+            v-for="product in productStore.productList"
+            :key="product.id"
             :name="product.name"
             :charge-method="product.chargeMethod"
             :image="product.image"
             :price="calculatePrice(product.priceNet, product.priceTaxPercentage)"
           >
             <template #actions>
-              <label v-if="nights > 28 && product.id === 1">Free</label>
+              <label v-if="nights >= 28 && product.id === 1">Free</label>
               <label v-else>
                 Select:
                 <input
@@ -135,24 +154,18 @@ function onFormSubmit() {
               </label>
             </template>
           </ProductPreview>
-        </template>
-      </div>
+        </ProductPreviewGrid>
+        <br />
+        <h4>Nights: {{ nights }}</h4>
+        <p>Room total price: {{ calculatedRoomsPrice.toFixed(2) }}</p>
+        <p v-if="calculatedProductsPrice">
+          Products total price: {{ calculatedProductsPrice.toFixed(2) }}
+        </p>
+        <button>
+          Book now for {{ (calculatedRoomsPrice + calculatedProductsPrice).toFixed(2) }}
+        </button>
+      </form>
     </section>
-    <br />
-    <form @submit.prevent="onFormSubmit">
-      Nights: {{ nights }}
-      <div>todo breakfest</div>
-      <h3>Calculated price and discount</h3>
-      <button>Book now for 'price'</button>
-    </form>
   </div>
   <div v-else>Room is not available</div>
 </template>
-
-<style lang="scss">
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  grid-gap: 10px;
-}
-</style>

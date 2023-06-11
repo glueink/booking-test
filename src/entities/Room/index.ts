@@ -1,5 +1,13 @@
 import type { RoomItem, RoomList } from './types';
 import { useRoomStore } from './store';
+import { getRoomPriceResult, getRoomDiscountResult } from './utils';
 import RoomPreview from './ui/RoomPreview.vue';
 
-export { useRoomStore, type RoomItem, type RoomList, RoomPreview };
+export {
+  type RoomItem,
+  type RoomList,
+  useRoomStore,
+  RoomPreview,
+  getRoomPriceResult,
+  getRoomDiscountResult
+};

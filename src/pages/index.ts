@@ -1,6 +1,7 @@
 import { type RouteRecordRaw } from 'vue-router';
 
-import { useCheckoutStore } from '@/features/Checkout';
+import { useBookingStore } from '@/features/Booking';
+import { PageRoutes } from '@/shared';
 
 import MainPage from './ui/MainPage.vue';
 import RoomDetailsPage from './ui/RoomDetailsPage.vue';
@@ -9,21 +10,21 @@ import SuccessPage from './ui/SuccessPage.vue';
 const routes: Readonly<RouteRecordRaw[]> = [
   {
     path: '/',
-    name: 'main',
+    name: PageRoutes.MAIN,
     component: MainPage
   },
   {
     path: '/room/:roomId',
-    name: 'roomDetails',
+    name: PageRoutes.ROOM_DETAILS,
     component: RoomDetailsPage
   },
   {
     path: '/success',
-    name: 'success',
+    name: PageRoutes.SUCCESS,
     component: SuccessPage,
     beforeEnter(to, from) {
-      const checkoutStore = useCheckoutStore();
-      if (!checkoutStore.isAvailable) {
+      const bookingStore = useBookingStore();
+      if (!bookingStore.isCheckoutAvailable) {
         return from;
       }
     }

@@ -3,7 +3,7 @@ defineProps<{
   name: string;
   imageSrc: string;
   price: number;
-  discount: number;
+  discount?: number;
 }>();
 </script>
 

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { FilterForm, useFilter } from '@/features/Filter';
 import { useRoomStore, type RoomItem, RoomPreview } from '@/entities/Room';
 import { useBookingStore, checkAvailableRoom } from '@/features/Booking';
-import { calculateNights, calculateDiscount, calculatePrice } from '@/shared';
+import { calculateNights, calculateDiscount, calculatePrice, PageRoutes } from '@/shared';
 
 const router = useRouter();
 const { filter, handleFilterChange } = useFilter();
@@ -34,7 +34,7 @@ function handleBookNow(room: RoomItem) {
   const { id } = room;
 
   router.push({
-    name: 'roomDetails',
+    name: PageRoutes.ROOM_DETAILS,
     params: { roomId: id.toString() },
     query: filter.value
   });

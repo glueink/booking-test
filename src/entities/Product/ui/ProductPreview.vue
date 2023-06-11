@@ -6,6 +6,7 @@ defineProps<{
   price: number;
   chargeMethod: ChargeMethod;
   image: string;
+  isFree?: boolean;
 }>();
 </script>
 
@@ -16,6 +17,9 @@ defineProps<{
     <p v-if="chargeMethod">Charge Method: {{ chargeMethod }}</p>
     <p>
       <b>Price: {{ price }}</b>
+    </p>
+    <p v-if="isFree">
+      <b>Free!</b>
     </p>
     <div v-if="$slots.actions"><slot name="actions" /></div>
   </span>

@@ -32,7 +32,6 @@ export function convertDate(value: Date): DateObject {
     json: value.toJSON(), // 2023-05-31T00:00:00.000Z
     iso: value.toISOString().slice(0, 10) // 2023-05-31
   };
-  console.log(dateObject);
   return dateObject;
 }
 
@@ -116,10 +115,12 @@ export function calculateNights(startDate?: string, endDate?: string): number {
   return numberOfNights || 1;
 }
 
+// TODO refactor
 export function calculatePrice(netPrice: number, taxPercent: number): number {
   return netPrice + netPrice * taxPercent;
 }
 
+// TODO refactor
 export function calculateDiscount(number: number, nights: number): number {
   if (nights >= 3) {
     return ~~((number * 5) / 100);

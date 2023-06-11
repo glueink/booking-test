@@ -1,4 +1,5 @@
 import api from './api';
+import { PageRoutes } from './enums';
 import {
   parseDate,
   parseIsoToDateObject,
@@ -14,6 +15,7 @@ import {
 
 export {
   api,
+  PageRoutes,
   parseDate,
   parseIsoToDateObject,
   convertDate,
