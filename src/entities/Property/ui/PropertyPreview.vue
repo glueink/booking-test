@@ -10,6 +10,7 @@ defineProps<{
 <template>
   <div class="property__item">
     <div>Property name: {{ name }}</div>
+    <div>Property local time: {{ new Date().toLocaleString('en-EN', { timeZone: timezone }) }}</div>
     <p>Checkin time:</p>
     <div class="property__time-list">
       <span v-for="time in startTimesLocal" :key="time" class="property__checkin-item"
