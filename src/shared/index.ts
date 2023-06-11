@@ -8,7 +8,8 @@ import {
   calculatePrice,
   calculateDiscount,
   isoDateSchema,
-  isIsoDate
+  isIsoDate,
+  addStringDateDays
 } from './utils';
 
 export {
@@ -21,5 +22,6 @@ export {
   calculatePrice,
   calculateDiscount,
   isoDateSchema,
-  isIsoDate
+  isIsoDate,
+  addStringDateDays
 };

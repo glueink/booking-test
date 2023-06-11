@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { checkAvailableRoom, useBookingStore } from '@/features/Booking';
-import { FilterForm, useFilter } from '@/features/Filter';
+import { FilterForm, useFilter, type FilterType } from '@/features/Filter';
 import { usePropertyStore, PropertyPreview } from '@/entities/Property';
 import { useRoomStore, RoomPreview } from '@/entities/Room';
 import { useProductStore, ProductPreview } from '@/entities/Product';
@@ -45,24 +45,38 @@ const nights = computed(() => {
   return calculateNights(startDate, endDate);
 });
 
-type formData = {
+type FormData = {
   startDate: string;
   endDate: string;
   roomId: number;
   productIds: number[];
 };
 
+const formData = ref<FormData>();
+const productIds = ref([]);
+
+function resetForm() {
+  formData.value = undefined;
+  productIds.value = [];
+}
+
+function onFilterSubmit(payload: FilterType) {
+  handleFilterChange(payload);
+  resetForm();
+}
+
 function onFormSubmit() {
   try {
-    if (!filter.value) {
+    if (!filter.value || !currentRoom.value) {
       return;
     }
     checkoutStore.doCheckout({
-      endDate: filter.value?.endDate,
-      startDate: filter.value?.startDate,
-      productIdList: [],
-      roomId: 1
+      endDate: filter.value.endDate,
+      startDate: filter.value.startDate,
+      productIdList: productIds.value,
+      roomId: currentRoom.value.id
     });
+    resetForm();
   } catch (err) {
     console.error(err);
   }
@@ -70,7 +84,7 @@ function onFormSubmit() {
 </script>
 
 <template>
-  <FilterForm class="filter" :filter="filter" @submit="handleFilterChange" />
+  <FilterForm class="filter" :filter="filter" @submit="onFilterSubmit($event)" />
   <div v-if="currentRoom && filter && isRoomAvailable">
     <section>
       <h4>Room details</h4>
@@ -101,21 +115,27 @@ function onFormSubmit() {
     <section>
       <h4>Available products</h4>
       <div class="product-grid">
-        <ProductPreview
-          v-for="product in productStore.productList"
-          :key="product.id"
-          :name="product.name"
-          :charge-method="product.chargeMethod"
-          :image="product.image"
-          :price="calculatePrice(product.priceNet, product.priceTaxPercentage)"
-        >
-          <template #actions>
-            <label>
-              Select:
-              <input :name="product.name" type="checkbox" />
-            </label>
-          </template>
-        </ProductPreview>
+        <template v-for="product in productStore.productList" :key="product.id">
+          <ProductPreview
+            :name="product.name"
+            :charge-method="product.chargeMethod"
+            :image="product.image"
+            :price="calculatePrice(product.priceNet, product.priceTaxPercentage)"
+          >
+            <template #actions>
+              <label v-if="nights > 28 && product.id === 1">Free</label>
+              <label v-else>
+                Select:
+                <input
+                  :name="product.name"
+                  type="checkbox"
+                  :value="product.id"
+                  v-model="productIds"
+                />
+              </label>
+            </template>
+          </ProductPreview>
+        </template>
       </div>
     </section>
     <br />

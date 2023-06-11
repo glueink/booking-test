@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
-import { parseDate } from '@/shared';
+import { addStringDateDays, parseDate } from '@/shared';
 import { validateFilter } from '../utils';
 import { type FilterType } from '../types';
 
@@ -16,9 +16,12 @@ const localError = ref<string>();
 const startDate = ref<string | undefined>(props.filter?.startDate);
 const endDate = ref<string | undefined>(props.filter?.endDate);
 const startDateMin = parseDate(new Date()).iso;
-const endDateMin = computed(() =>
-  startDate.value ? parseDate(startDate.value).iso : startDateMin
-);
+const endDateMin = computed(() => {
+  if (startDate.value) {
+    return parseDate(addStringDateDays(startDate.value, 1)).iso;
+  }
+  return parseDate(addStringDateDays(startDateMin, 1)).iso;
+});
 
 watch(
   () => props.filter,
@@ -30,10 +33,11 @@ watch(
 
 function onChangeStartDate(event: Event) {
   const { value } = event.target as HTMLInputElement;
-  const parsedDate = parseDate(value);
-  startDate.value = parsedDate.iso;
-  if (!endDate.value || parsedDate.timestamp > parseDate(endDate.value).timestamp) {
-    endDate.value = parsedDate.iso;
+  const parsedStartDate = parseDate(value);
+  startDate.value = parsedStartDate.iso;
+  const parsedEndDateNew = parseDate(addStringDateDays(startDate.value, 1));
+  if (!endDate.value || parseDate(endDate.value).timestamp < parsedEndDateNew.timestamp) {
+    endDate.value = parsedEndDateNew.iso;
   }
 }
 

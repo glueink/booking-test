@@ -36,6 +36,11 @@ export function convertDate(value: Date): DateObject {
   return dateObject;
 }
 
+export function addStringDateDays(value: string, days: number) {
+  const myDate = new Date(value);
+  myDate.setDate(myDate.getDate() + days);
+  return myDate;
+}
 /**
  * format ISO 'YYYY-MM-DD'
  */
